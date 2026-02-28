@@ -39,3 +39,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+# n8n & Docker local data
+.n8n/
+n8n_data/
+docker-compose.override.yml
