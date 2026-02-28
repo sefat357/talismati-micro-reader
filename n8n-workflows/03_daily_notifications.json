@@ -1,0 +1,103 @@
+{
+  "name": "Daily Notifications",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 * * * *"
+            }
+          ]
+        }
+      },
+      "id": "schedule-daily",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const now = new Date();\nconst h = now.getHours();\nconst hourStr = String(h).padStart(2, '0') + ':00:00';\nconst nextH = (h + 1) % 24;\nconst nextHourStr = String(nextH).padStart(2, '0') + ':00:00';\nreturn [{ json: { hourStr, nextHourStr } }];"
+      },
+      "id": "code-current-hour",
+      "name": "Current Hour Range",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "resource": "row",
+        "operation": "getAll",
+        "tableId": "Users",
+        "returnAll": true,
+        "filterType": "string",
+        "filterString": "=notification_time=gte.'{{ $json.hourStr }}'&notification_time=lt.'{{ $json.nextHourStr }}'"
+      },
+      "id": "supabase-get-users",
+      "name": "Get Users by Notification Time",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "operation": "send",
+        "toList": "={{ $json.email }}",
+        "subject": "Time to read!",
+        "message": "Time to read! Open Tailsmati Micro-Reader and pick up where you left off.",
+        "emailType": "text"
+      },
+      "id": "gmail-send-reminder",
+      "name": "Send Reminder Email",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [900, 300]
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Current Hour Range",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Current Hour Range": {
+      "main": [
+        [
+          {
+            "node": "Get Users by Notification Time",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Users by Notification Time": {
+      "main": [
+        [
+          {
+            "node": "Send Reminder Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {},
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "pinData": {}
+}
