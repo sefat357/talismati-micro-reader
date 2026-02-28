@@ -1,0 +1,8 @@
+# .coderabbit.yaml
+language: "en-US"
+reviews:
+  profile: "chill"
+  auto_review: true
+  collapse_walkthrough: true
+chat:
+  enabled: true
