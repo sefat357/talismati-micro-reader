@@ -1,0 +1,111 @@
+{
+  "name": "Progress Sync",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "sync-progress",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "webhook-sync-progress",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 300],
+      "webhookId": "sync-progress"
+    },
+    {
+      "parameters": {
+        "resource": "row",
+        "operation": "update",
+        "tableId": "Reading_State",
+        "filterType": "manual",
+        "matchType": "allFilters",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "user_id",
+              "keyValue": "={{ $json.body.userId }}"
+            },
+            {
+              "keyName": "book_id",
+              "keyValue": "={{ $json.body.bookId }}"
+            }
+          ]
+        },
+        "dataToSend": "defineBelow",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "current_cfi_index",
+              "fieldValue": "={{ $json.body.newCfiIndex }}"
+            },
+            {
+              "fieldId": "status",
+              "fieldValue": "READING"
+            }
+          ]
+        }
+      },
+      "id": "supabase-update-reading-state",
+      "name": "Update Reading_State",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [460, 220]
+    },
+    {
+      "parameters": {
+        "resource": "row",
+        "operation": "create",
+        "tableId": "Session_Logs",
+        "dataToSend": "defineBelow",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "user_id",
+              "fieldValue": "={{ $json.body.userId }}"
+            },
+            {
+              "fieldId": "book_id",
+              "fieldValue": "={{ $json.body.bookId }}"
+            },
+            {
+              "fieldId": "time_spent_seconds",
+              "fieldValue": "={{ $json.body.secondsSpent }}"
+            }
+          ]
+        }
+      },
+      "id": "supabase-insert-session-log",
+      "name": "Insert Session_Logs",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [460, 380]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Update Reading_State",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Insert Session_Logs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {},
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "pinData": {}
+}
