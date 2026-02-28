@@ -17,18 +17,28 @@
     },
     {
       "parameters": {
-        "resource": "file",
-        "operation": "download",
-        "fileId": {
-          "__rl": true,
-          "mode": "id",
-          "value": "={{ $json.body.fileId }}"
+        "method": "GET",
+        "url": "=https://www.googleapis.com/drive/v3/files/{{ $json.body.fileId }}?alt=media",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $json.body.userToken }}"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "responseFormat": "file",
+            "outputPropertyName": "data"
+          }
         }
       },
-      "id": "google-drive-download",
-      "name": "Google Drive",
-      "type": "n8n-nodes-base.googleDrive",
-      "typeVersion": 3,
+      "id": "http-request-drive",
+      "name": "HTTP Request",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
       "position": [460, 300]
     },
     {
@@ -58,14 +68,14 @@
       "main": [
         [
           {
-            "node": "Google Drive",
+            "node": "HTTP Request",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Google Drive": {
+    "HTTP Request": {
       "main": [
         [
           {
