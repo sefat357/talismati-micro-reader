@@ -3,9 +3,12 @@
 ## Phase 1: Environment & Project Setup
 - [ ] Initialize Next.js project with Tailwind CSS (`npx create-next-app@latest`).
 - [ ] Set up the GitHub repository and link it to Vercel for continuous deployment.
+- [ ] Install CodeRabbit to GitHub for automated pull request reviews.
 - [ ] Create a new Supabase project.
 - [ ] Ensure n8n is running locally (or via your cloud setup) and connected to Cursor via the MCP server.
-- [ ] Set up `.env.local` with Supabase URL, Anon Key, and n8n webhook URLs.
+- [ ] **Security & Credentials:**
+  - [ ] Set up `.env.local` (or standard `.env`) to securely store all API keys and environment variables (Supabase URL, Anon Key, OpenAI key, n8n webhook URLs, etc.).
+  - [ ] Verify that `.env`, `.env.local`, and any other secret files are explicitly added to `.gitignore` so they are **never** committed to GitHub.
 
 ## Phase 2: Database & Authentication (Supabase)
 - [ ] **Configure Auth:** Set up Google OAuth provider in Supabase (requesting Google Drive read scopes).
