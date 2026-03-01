@@ -1,5 +1,5 @@
 {
-  "name": "Daily Notifications",
+  "name": "Daily Notifications (Global Timezone)",
   "nodes": [
     {
       "parameters": {
@@ -20,27 +20,25 @@
     },
     {
       "parameters": {
-        "jsCode": "// Force the time to Asia/Dhaka so it matches your local clock\nconst dhakaTimeStr = new Date().toLocaleString('en-US', { timeZone: 'Asia/Dhaka' });\nconst dhakaDate = new Date(dhakaTimeStr);\n\nconst h = dhakaDate.getHours();\nconst hourStr = String(h).padStart(2, '0') + ':00:00';\nconst nextH = (h + 1) % 24;\nconst nextHourStr = String(nextH).padStart(2, '0') + ':00:00';\n\nreturn [{ json: { hourStr, nextHourStr } }];"
+        "resource": "row",
+        "operation": "getAll",
+        "tableId": "Users",
+        "returnAll": true
       },
-      "id": "code-current-hour",
-      "name": "Current Hour Range",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
+      "id": "supabase-get-all",
+      "name": "Fetch All Users",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
       "position": [460, 300]
     },
     {
       "parameters": {
-        "resource": "row",
-        "operation": "getAll",
-        "tableId": "Users",
-        "returnAll": true,
-        "filterType": "string",
-        "filterString": "=notification_time=gte.'{{ $json.hourStr }}'&notification_time=lt.'{{ $json.nextHourStr }}'"
+        "jsCode": "const usersToNotify = [];\n\nfor (const item of $input.all()) {\n  const user = item.json;\n\n  // Skip if they don't have a time or timezone set\n  if (!user.notification_time || !user.timezone) continue;\n\n  try {\n    // Get the current hour in the user's specific timezone\n    const userLocalTimeStr = new Date().toLocaleString('en-US', {\n      timeZone: user.timezone,\n      hour12: false,\n      hour: 'numeric'\n    });\n\n    let userCurrentHour = parseInt(userLocalTimeStr, 10);\n    if (userCurrentHour === 24) userCurrentHour = 0;\n\n    // The DB stores time as \"18:00:00\". Extract the \"18\".\n    const preferenceHour = parseInt(user.notification_time.split(':')[0], 10);\n\n    // Match!\n    if (userCurrentHour === preferenceHour) {\n      usersToNotify.push(item);\n    }\n  } catch (e) {\n    // Skip if timezone string is invalid\n    continue;\n  }\n}\n\nreturn usersToNotify;"
       },
-      "id": "supabase-get-users",
-      "name": "Get Users by Notification Time",
-      "type": "n8n-nodes-base.supabase",
-      "typeVersion": 1,
+      "id": "code-timezone-filter",
+      "name": "Filter by Timezone",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
       "position": [680, 300]
     },
     {
@@ -76,25 +74,25 @@
       "main": [
         [
           {
-            "node": "Current Hour Range",
+            "node": "Fetch All Users",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Current Hour Range": {
+    "Fetch All Users": {
       "main": [
         [
           {
-            "node": "Get Users by Notification Time",
+            "node": "Filter by Timezone",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Get Users by Notification Time": {
+    "Filter by Timezone": {
       "main": [
         [
           {
