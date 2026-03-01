@@ -12,7 +12,7 @@
           ]
         }
       },
-      "id": "schedule-daily",
+      "id": "schedule-hourly",
       "name": "Schedule Trigger",
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.2,
@@ -20,7 +20,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const now = new Date();\nconst h = now.getHours();\nconst hourStr = String(h).padStart(2, '0') + ':00:00';\nconst nextH = (h + 1) % 24;\nconst nextHourStr = String(nextH).padStart(2, '0') + ':00:00';\nreturn [{ json: { hourStr, nextHourStr } }];"
+        "jsCode": "// Force the time to Asia/Dhaka so it matches your local clock\nconst dhakaTimeStr = new Date().toLocaleString('en-US', { timeZone: 'Asia/Dhaka' });\nconst dhakaDate = new Date(dhakaTimeStr);\n\nconst h = dhakaDate.getHours();\nconst hourStr = String(h).padStart(2, '0') + ':00:00';\nconst nextH = (h + 1) % 24;\nconst nextHourStr = String(nextH).padStart(2, '0') + ':00:00';\n\nreturn [{ json: { hourStr, nextHourStr } }];"
       },
       "id": "code-current-hour",
       "name": "Current Hour Range",
@@ -45,17 +45,29 @@
     },
     {
       "parameters": {
-        "resource": "message",
-        "operation": "send",
-        "toList": "={{ $json.email }}",
-        "subject": "Time to read!",
-        "message": "Time to read! Open Tailsmati Micro-Reader and pick up where you left off.",
-        "emailType": "text"
+        "method": "POST",
+        "url": "https://api.onesignal.com/notifications",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Key YOUR_ONESIGNAL_REST_API_KEY"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"app_id\": \"YOUR_ONESIGNAL_APP_ID\",\n  \"include_subscription_ids\": [\"{{ $json.push_id }}\"],\n  \"contents\": {\n    \"en\": \"Tailsmati: It is time for your daily reading session!\"\n  }\n}"
       },
-      "id": "gmail-send-reminder",
-      "name": "Send Reminder Email",
-      "type": "n8n-nodes-base.gmail",
-      "typeVersion": 2.1,
+      "id": "http-onesignal-push",
+      "name": "Send Push via OneSignal",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
       "position": [900, 300]
     }
   ],
@@ -86,18 +98,12 @@
       "main": [
         [
           {
-            "node": "Send Reminder Email",
+            "node": "Send Push via OneSignal",
             "type": "main",
             "index": 0
           }
         ]
       ]
     }
-  },
-  "active": false,
-  "settings": {},
-  "meta": {
-    "templateCredsSetupCompleted": false
-  },
-  "pinData": {}
+  }
 }
