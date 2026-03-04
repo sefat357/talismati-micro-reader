@@ -1,58 +1,58 @@
-import { redirect } from "next/navigation";
-import { createClient } from "../utils/supabase/server";
-import SignInForm from "./SignInForm";
+import Link from "next/link";
+import { ChevronRight, Sparkles } from "lucide-react";
+import { HeroAppMockup } from "@/components/ui/hero-app-mockup";
+import { BentoFeatures } from "@/components/ui/bento-features";
+import { BottomFunnel } from "@/components/ui/bottom-funnel";
 
-async function signOut() {
-  "use server";
-  const supabase = await createClient();
-  await supabase.auth.signOut();
-  redirect("/");
-}
+export default function LandingPage() {
+  return (
+    <main className="min-h-screen bg-black text-white overflow-hidden font-sans selection:bg-white/30">
+      {/* Glassmorphic Navigation */}
+      <nav className="fixed top-0 w-full z-50 border-b border-white/5 bg-black/50 backdrop-blur-xl">
+        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+          <span className="text-white font-bold tracking-tighter text-xl">Talismati.</span>
+          <Link href="/login" className="text-sm font-medium text-zinc-300 hover:text-white transition-colors">
+            Sign In
+          </Link>
+        </div>
+      </nav>
+      {/* Hero Section */}
+      <div className="relative z-10 flex flex-col items-center justify-center min-h-screen px-6 text-center pt-32 pb-20">
 
-export default async function Home() {
-  const supabase = await createClient();
-  const { data } = await supabase.auth.getUser();
-
-  if (data?.user) {
-    return (
-      <div className="flex min-h-screen flex-col bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950 text-zinc-50">
-        <header className="border-b border-zinc-800/80 px-4 py-4 sm:px-6">
-          <div className="mx-auto flex max-w-4xl items-center justify-between">
-            <span className="text-sm font-medium text-zinc-400">
-              Tailsmati Micro-Reader
-            </span>
-            <form action={signOut}>
-              <button
-                type="submit"
-                className="rounded-lg border border-zinc-700 bg-zinc-800/80 px-4 py-2 text-sm font-medium text-zinc-200 transition hover:bg-zinc-700 hover:text-white"
-              >
-                Sign Out
-              </button>
-            </form>
-          </div>
-        </header>
-        <main className="flex flex-1 flex-col items-center justify-center px-4 py-16">
-          <div className="w-full max-w-md rounded-2xl border border-zinc-800 bg-zinc-950/60 p-8 shadow-2xl shadow-black/40 backdrop-blur">
-            <h1 className="text-2xl font-semibold tracking-tight text-zinc-50 sm:text-3xl">
-              Welcome to Tailsmati Micro-Reader
-            </h1>
-            <p className="mt-2 text-sm text-zinc-400">
-              You’re signed in and ready to capture the small but important
-              things you read.
-            </p>
-            <div className="mt-6 rounded-xl border border-zinc-800 bg-zinc-900/50 px-4 py-3">
-              <p className="text-xs font-medium uppercase tracking-wider text-zinc-500">
-                Signed in as
-              </p>
-              <p className="mt-1 font-medium text-zinc-100">
-                {data.user.email ?? "No email"}
-              </p>
-            </div>
-          </div>
-        </main>
+        {/* Linear-style Pill Badge */}
+        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs sm:text-sm text-zinc-300 mb-8 hover:bg-white/10 transition-colors cursor-pointer animate-in fade-in slide-in-from-bottom-4 duration-1000">
+          <Sparkles className="size-4 text-zinc-400" />
+          <span className="font-medium">The micro-reading engine is live</span>
+          <ChevronRight className="size-3 text-zinc-500" />
+        </div>
+        {/* Apple-style Cinematic Typography */}
+        <h1 className="text-5xl sm:text-7xl md:text-8xl font-bold tracking-tighter mb-8 max-w-5xl bg-gradient-to-b from-white via-white/90 to-white/30 bg-clip-text text-transparent animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-150">
+          Finish every book. <br className="hidden sm:block" />
+          One micro-habit at a time.
+        </h1>
+        {/* High-Contrast Subtitle */}
+        <p className="text-lg sm:text-xl text-zinc-400 max-w-2xl mb-12 leading-relaxed animate-in fade-in slide-in-from-bottom-10 duration-1000 delay-300">
+          Talismati breaks down your EPUB library into engineered daily chunks.
+          Designed for high-performers who want to read smarter, not harder.
+        </p>
+        {/* Premium CTAs */}
+        <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto animate-in fade-in slide-in-from-bottom-12 duration-1000 delay-500">
+          <Link href="/login" className="w-full sm:w-auto flex items-center justify-center gap-2 bg-white text-black px-8 py-3.5 rounded-full font-semibold hover:scale-105 transition-transform duration-300">
+            Start building habits
+          </Link>
+          <Link href="#features" className="w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-3.5 rounded-full font-medium text-white border border-white/10 hover:bg-white/5 transition-colors">
+            Explore the engine
+          </Link>
+        </div>
+        {/* The 'Product Reveal' Stage */}
+        <div className="mt-24 relative w-full max-w-5xl aspect-[16/9] rounded-2xl border border-white/10 bg-zinc-950/50 backdrop-blur-md flex items-center justify-center shadow-[0_0_120px_rgba(255,255,255,0.05)] animate-in fade-in slide-in-from-bottom-16 duration-1000 delay-700">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.1)_0%,transparent_50%)]" />
+          <div className="absolute top-0 w-full h-px bg-gradient-to-r from-transparent via-white/30 to-transparent" />
+          <HeroAppMockup />
+        </div>
       </div>
-    );
-  }
-
-  return <SignInForm />;
+      <BentoFeatures />
+      <BottomFunnel />
+    </main>
+  );
 }

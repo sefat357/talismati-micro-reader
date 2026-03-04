@@ -1,78 +1,76 @@
-"use client"
-import { useRef, useMemo } from "react"
-import { useFrame } from "@react-three/fiber"
-import * as THREE from "three"
+"use client";
+import { useRef, useMemo } from "react";
+import { useFrame } from "@react-three/fiber";
+import * as THREE from "three";
 
 const vertexShader = `
-uniform float time;
-uniform float intensity;
 varying vec2 vUv;
-varying vec3 vPosition;
+varying float vElevation;
+uniform float uTime;
 
 void main() {
   vUv = uv;
-  vPosition = position;
-  vec3 pos = position;
+  vec4 modelPosition = modelMatrix * vec4(position, 1.0);
 
-  pos.y += sin(pos.x * 10.0 + time) * 0.1 * intensity;
-  pos.x += cos(pos.y * 8.0 + time * 1.5) * 0.05 * intensity;
-
-  gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
+  // Create massive, slow, elegant sweeping waves
+  float elevation = sin(modelPosition.x * 0.3 + uTime * 0.2) * 0.8
+                  + cos(modelPosition.y * 0.2 + uTime * 0.15) * 0.8;
+  modelPosition.z += elevation;
+  vElevation = elevation;
+  
+  gl_Position = projectionMatrix * viewMatrix * modelPosition;
 }
-`
+`;
 
 const fragmentShader = `
-uniform float time;
-uniform float intensity;
-uniform vec3 color1;
-uniform vec3 color2;
 varying vec2 vUv;
-varying vec3 vPosition;
+varying float vElevation;
 
 void main() {
-  vec2 uv = vUv;
-  float noise = sin(uv.x * 20.0 + time) * cos(uv.y * 15.0 + time * 0.8);
-  noise += sin(uv.x * 35.0 - time * 2.0) * cos(uv.y * 25.0 + time * 1.2) * 0.5;
+  // Deep, premium color palette
+  // Deepest shadow has a very faint, almost imperceptible red tint for the brand
+  vec3 shadowColor = vec3(0.04, 0.0, 0.0);
+  
+  // Peaks catch a dark, moody silver light
+  vec3 highlightColor = vec3(0.15, 0.15, 0.18);
 
-  vec3 color = mix(color1, color2, noise);
-  // Boost the 'Silver' highlights significantly
-  color += pow(noise, 3.0) * 0.4; 
-  // Soften the vignette so it doesn't turn the screen black
-  float vignette = smoothstep(1.2, 0.3, length(vUv - 0.5));
-  gl_FragColor = vec4(color * vignette, 1.0);
+  // Mix based on the wave height
+  float mixValue = (vElevation + 1.6) * 0.3; // Normalize the elevation
+  vec3 finalColor = mix(shadowColor, highlightColor, mixValue);
+  
+  // Add a massive, soft radial vignette to blend perfectly into the black UI
+  float distance = length(vUv - 0.5);
+  float vignette = smoothstep(0.8, 0.1, distance);
+  
+  gl_FragColor = vec4(finalColor * vignette, 1.0);
 }
-`
+`;
 
-export function ShaderPlane({ position = [0, 0, 0], color1 = "#020000", color2 = "#ffffff" }: { position?: [number, number, number], color1?: string, color2?: string }) {
-  const mesh = useRef<THREE.Mesh>(null)
+export function ShaderPlane() {
+  const materialRef = useRef<THREE.ShaderMaterial>(null);
 
-  const uniforms = useMemo(
-    () => ({
-      time: { value: 0 },
-      intensity: { value: 1.0 },
-      color1: { value: new THREE.Color(color1) },
-      color2: { value: new THREE.Color(color2) },
-    }),
-    [color1, color2]
-  )
+  const uniforms = useMemo(() => ({
+    uTime: { value: 0 }
+  }), []);
 
   useFrame((state) => {
-    if (mesh.current) {
-      uniforms.time.value = state.clock.elapsedTime;
-      uniforms.intensity.value = 1.0 + Math.sin(state.clock.elapsedTime * 2) * 0.3;
+    if (materialRef.current) {
+      materialRef.current.uniforms.uTime.value = state.clock.elapsedTime;
     }
-  })
+  });
 
   return (
-    <mesh ref={mesh} position={position}>
-      <planeGeometry args={[2, 2, 32, 32]} />
+    // Flat orientation, scaled massively to cover the whole viewport
+    <mesh rotation={[0, 0, 0]} scale={[15, 15, 1]} position={[0, 0, -2]}>
+      <planeGeometry args={[1, 1, 128, 128]} />
       <shaderMaterial
-        uniforms={uniforms}
+        ref={materialRef}
         vertexShader={vertexShader}
         fragmentShader={fragmentShader}
-        transparent
-        side={THREE.DoubleSide}
+        uniforms={uniforms}
+        transparent={true}
+        wireframe={false}
       />
     </mesh>
-  )
+  );
 }
