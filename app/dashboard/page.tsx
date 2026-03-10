@@ -1,120 +1,126 @@
-import { Flame, Play, Clock, BookOpen, ChevronRight, TrendingUp, Target } from "lucide-react";
+"use client";
+import { useState } from "react";
+import { Play, ChevronRight, Sparkles, BookDashed } from "lucide-react";
+import ImportBookButton from "@/components/ui/ImportBookButton";
 
-export default function DashboardLibraryPage() {
+export default function DashboardHomePage() {
+    // Dynamic state for our library
+    const [activeBook, setActiveBook] = useState<any | null>(null);
+    const [libraryBooks, setLibraryBooks] = useState<any[]>([]);
+
+    // Handler for when Google Drive returns a file
+    const handleFileImport = (file: any) => {
+        const newBook = {
+            id: file.id,
+            title: file.name.replace(/\.[^/.]+$/, ""), // Strip extension
+            author: "Imported Document",
+            progress: 0,
+            coverColor: "bg-zinc-800",
+        };
+
+        if (!activeBook) {
+            setActiveBook(newBook);
+        } else {
+            setLibraryBooks((prev) => [...prev, newBook]);
+        }
+    };
+
     return (
-        <div className="flex flex-col gap-8">
-            {/* Header Section */}
-            <div className="flex flex-col gap-1 relative z-10">
-                <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-white">
-                    Welcome back, Sefat.
-                </h1>
-                <p className="text-zinc-400 text-sm md:text-base">
-                    You have a <span className="text-white font-semibold">15-minute</span> chunk waiting. Keep the streak alive.
-                </p>
-            </div>
-
-            {/* BENTO BOX GRID */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 relative z-10">
-
-                {/* Left Bento: Currently Reading (Takes up 2 columns) */}
-                <div className="lg:col-span-2 relative group rounded-3xl bg-zinc-900/50 border border-white/10 p-6 sm:p-8 overflow-hidden shadow-2xl backdrop-blur-md flex flex-col justify-between">
-
-                    {/* Ambient Glow */}
-                    <div className="absolute top-0 right-0 w-96 h-96 bg-red-500/10 rounded-full blur-[80px] pointer-events-none -translate-y-1/2 translate-x-1/3 group-hover:bg-red-500/20 transition-colors duration-700" />
-                    <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.15] mix-blend-overlay pointer-events-none"></div>
-
-                    <div className="flex items-center justify-between mb-6 relative z-10">
-                        <div className="flex items-center gap-2">
-                            <div className="size-2 bg-red-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(239,68,68,0.8)]"></div>
-                            <h2 className="text-xs font-bold text-zinc-400 uppercase tracking-widest">Active Chunk</h2>
-                        </div>
+        <div className="relative w-full min-h-screen text-white overflow-hidden flex flex-col">
+            {/* Performance Fix: Replaced GPU-heavy CSS blurs with native CSS radial gradients */}
+            <div
+                className="absolute inset-0 pointer-events-none opacity-50"
+                style={{
+                    backgroundImage: 'radial-gradient(circle at 20% -10%, rgba(220, 38, 38, 0.08) 0%, transparent 40%), radial-gradient(circle at 80% 40%, rgba(255, 255, 255, 0.03) 0%, transparent 30%)'
+                }}
+            />
+            <div className="w-full max-w-5xl mx-auto px-6 pt-12 md:pt-20 relative z-10">
+                <header className="mb-16 flex items-center justify-between opacity-0 animate-[fadeIn_0.8s_ease-out_forwards]">
+                    <h2 className="text-zinc-400 text-sm md:text-base font-medium tracking-tight flex items-center gap-2">
+                        <Sparkles className="size-4 text-zinc-500" />
+                        Welcome back, Sefat.
+                    </h2>
+                    <div className="text-xs font-bold text-zinc-500 tracking-widest uppercase">
+                        {activeBook ? "Phase 01 // Active" : "Phase 00 // Standby"}
                     </div>
+                </header>
 
-                    <div className="flex flex-col sm:flex-row gap-8 items-start relative z-10 flex-1">
-                        {/* Cover Art */}
-                        <div className="w-32 sm:w-40 aspect-[2/3] flex-shrink-0 bg-gradient-to-br from-zinc-800 to-zinc-950 rounded-lg border border-white/10 shadow-[0_20px_40px_rgba(0,0,0,0.6)] relative overflow-hidden group/cover transform group-hover:-translate-y-2 transition-transform duration-500">
-                            <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-transparent opacity-0 group-hover/cover:opacity-100 transition-opacity duration-500 z-10" />
-                            <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-white/20 to-transparent z-20"></div>
-
-                            <div className="absolute inset-0 flex flex-col items-center justify-center p-3 text-center">
-                                <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest mb-1">James Clear</span>
-                                <span className="text-lg font-serif font-bold text-zinc-300 leading-tight">Atomic<br />Habits</span>
-                            </div>
-                        </div>
-
-                        {/* Info & Action */}
-                        <div className="flex flex-col justify-center flex-1 w-full">
-                            <h3 className="text-2xl sm:text-3xl font-serif font-bold text-white tracking-tight mb-2">
-                                Atomic Habits
-                            </h3>
-                            <p className="text-zinc-400 text-sm mb-6 line-clamp-2 leading-relaxed">
-                                Today's chunk covers the 1st Law of Behavior Change: Make it Obvious.
-                            </p>
-
-                            {/* Compact Progress */}
-                            <div className="w-full space-y-2 mb-8">
-                                <div className="flex justify-between text-[10px] font-bold uppercase tracking-wider">
-                                    <span className="text-white">Day 4 / 12</span>
-                                    <span className="text-zinc-500">33%</span>
-                                </div>
-                                <div className="h-1.5 w-full bg-black/60 rounded-full overflow-hidden border border-white/10 shadow-inner">
-                                    <div className="h-full bg-red-500 rounded-full w-[33%] shadow-[0_0_15px_rgba(239,68,68,0.5)] relative"></div>
-                                </div>
-                            </div>
-
-                            <button className="w-full sm:w-fit flex items-center justify-center gap-2 px-6 py-3 bg-white text-black text-sm font-extrabold rounded-xl hover:scale-[1.02] transition-all duration-300 shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:shadow-[0_0_30px_rgba(255,255,255,0.3)]">
-                                <Play className="size-4 fill-black" />
-                                Start Reading
-                            </button>
-                        </div>
-                    </div>
+                {/* Header Row for Queue & Import */}
+                <div className="flex items-center justify-between border-b border-white/10 pb-4 mb-12 opacity-0 animate-[fadeIn_0.8s_ease-out_forwards]" style={{ animationDelay: '100ms' }}>
+                    <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-widest">Library Vault</h3>
+                    <ImportBookButton onImport={handleFileImport} />
                 </div>
 
-                {/* Right Column: Analytics Widgets */}
-                <div className="flex flex-col gap-6">
-
-                    {/* Top Widget: Streak */}
-                    <div className="flex-1 rounded-3xl bg-zinc-900/40 border border-white/10 p-6 backdrop-blur-md flex flex-col justify-center relative overflow-hidden group">
-                        <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                        <div className="flex items-center gap-3 mb-4">
-                            <div className="p-2 bg-orange-500/10 rounded-lg border border-orange-500/20">
-                                <Flame className="size-4 text-orange-500" />
-                            </div>
-                            <span className="text-xs font-bold text-zinc-400 uppercase tracking-widest">Current Streak</span>
+                {/* Conditional Rendering: Empty State vs Active Book */}
+                {!activeBook ? (
+                    <div className="flex flex-col items-center justify-center py-32 opacity-0 animate-[slideUp_0.8s_ease-out_forwards]" style={{ animationDelay: '200ms' }}>
+                        <div className="size-20 bg-white/5 rounded-full flex items-center justify-center mb-6 border border-white/5">
+                            <BookDashed className="size-8 text-zinc-600" />
                         </div>
-                        <div className="flex items-baseline gap-2">
-                            <span className="text-4xl font-extrabold text-white">4</span>
-                            <span className="text-zinc-500 font-medium">days</span>
-                        </div>
-
-                        {/* Mini week timeline */}
-                        <div className="flex items-center gap-1.5 mt-4">
-                            {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((day, i) => (
-                                <div key={i} className={`flex-1 h-8 rounded-md flex items-center justify-center text-[10px] font-bold ${i < 4 ? 'bg-orange-500/20 text-orange-400 border border-orange-500/30' : 'bg-zinc-950 border border-white/5 text-zinc-600'}`}>
-                                    {day}
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-
-                    {/* Bottom Widget: Consistency */}
-                    <div className="flex-1 rounded-3xl bg-zinc-900/40 border border-white/10 p-6 backdrop-blur-md flex flex-col justify-center relative overflow-hidden group">
-                        <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                        <div className="flex items-center gap-3 mb-4">
-                            <div className="p-2 bg-blue-500/10 rounded-lg border border-blue-500/20">
-                                <Target className="size-4 text-blue-400" />
-                            </div>
-                            <span className="text-xs font-bold text-zinc-400 uppercase tracking-widest">Daily Goal</span>
-                        </div>
-                        <div className="flex items-baseline gap-2">
-                            <span className="text-4xl font-extrabold text-white">15</span>
-                            <span className="text-zinc-500 font-medium">min / day</span>
-                        </div>
-                        <p className="text-xs text-zinc-500 mt-4 leading-relaxed">
-                            You are in the top 12% of consistent readers this week.
+                        <h3 className="text-2xl font-medium tracking-tight text-zinc-300 mb-2">Your vault is empty</h3>
+                        <p className="text-zinc-500 font-light mb-8 text-center max-w-sm">
+                            Import an EPUB or PDF from your Google Drive to begin chunking your first reading session.
                         </p>
                     </div>
-                </div>
+                ) : (
+                    <>
+                        {/* Hero Section */}
+                        <section className="mb-24 flex flex-col md:flex-row gap-10 md:gap-16 items-center md:items-start group cursor-pointer">
+                            <div className="relative w-48 md:w-64 aspect-[2/3] shrink-0 transition-transform duration-500 ease-out group-hover:-translate-y-2">
+                                <div className={`absolute inset-0 ${activeBook.coverColor} rounded-sm shadow-[0_10px_30px_rgba(0,0,0,0.8)] border border-white/10 overflow-hidden`}>
+                                    <div className="absolute inset-y-0 left-0 w-3 bg-gradient-to-r from-black/40 to-transparent z-10" />
+                                    <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center">
+                                        <span className="text-xs font-mono text-zinc-500 uppercase tracking-widest rotate-[-90deg]">Drive Source</span>
+                                    </div>
+                                </div>
+                                <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 w-5/6 h-4 bg-black/50 blur-md transition-all duration-500 group-hover:w-full group-hover:bg-black/80 group-hover:blur-xl" />
+                            </div>
+                            <div className="flex flex-col flex-1 justify-center text-center md:text-left mt-4 md:mt-8">
+                                <div className="text-zinc-400 text-sm font-semibold tracking-widest uppercase mb-3 opacity-0 animate-[slideUp_0.8s_ease-out_forwards]">
+                                    In Progress • {activeBook.progress}%
+                                </div>
+                                <h1 className="text-4xl sm:text-5xl md:text-6xl font-black tracking-tight text-white leading-tight mb-3 opacity-0 animate-[slideUp_0.8s_ease-out_forwards]" style={{ animationDelay: '100ms' }}>
+                                    {activeBook.title}
+                                </h1>
+                                <p className="text-lg md:text-xl text-zinc-400 font-light tracking-tight mb-10 opacity-0 animate-[slideUp_0.8s_ease-out_forwards]" style={{ animationDelay: '200ms' }}>
+                                    {activeBook.author}
+                                </p>
+                                <div className="flex flex-col sm:flex-row items-center gap-6 opacity-0 animate-[slideUp_0.8s_ease-out_forwards]" style={{ animationDelay: '300ms' }}>
+                                    <button className="flex h-12 md:h-14 items-center justify-center rounded-full bg-white px-8 font-semibold text-black transition-all hover:bg-zinc-200 active:scale-95 shadow-[0_0_20px_rgba(255,255,255,0.1)]">
+                                        <span className="flex items-center gap-2 text-sm uppercase tracking-widest">
+                                            <Play className="size-4 fill-black" />
+                                            Start Session
+                                        </span>
+                                    </button>
+                                    <div className="hidden sm:flex flex-col gap-2 w-48">
+                                        <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
+                                            <div className="h-full bg-white rounded-full transition-all duration-1000 ease-out" style={{ width: `${activeBook.progress}%` }} />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                        {/* The Queue (Only renders if there are extra books) */}
+                        {libraryBooks.length > 0 && (
+                            <nav className="mt-16 opacity-0 animate-[fadeIn_0.8s_ease-out_forwards]" style={{ animationDelay: '400ms' }}>
+                                <div className="flex items-center justify-between border-b border-white/10 pb-4 mb-2">
+                                    <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-widest">Up Next</h3>
+                                </div>
+                                <ul className="flex flex-col">
+                                    {libraryBooks.map((book, idx) => (
+                                        <li key={book.id} className="group flex items-center justify-between py-5 border-b border-white/5 hover:border-white/10 transition-colors cursor-pointer active:bg-white/[0.02]">
+                                            <div className="flex items-baseline gap-4">
+                                                <span className="text-zinc-600 font-mono text-xs group-hover:text-zinc-400 transition-colors">0{idx + 1}</span>
+                                                <h4 className="text-base md:text-lg font-medium text-zinc-300 group-hover:text-white transition-colors tracking-tight">{book.title}</h4>
+                                            </div>
+                                            <ChevronRight className="size-4 text-zinc-600 group-hover:text-white transition-colors group-hover:translate-x-1" />
+                                        </li>
+                                    ))}
+                                </ul>
+                            </nav>
+                        )}
+                    </>
+                )}
             </div>
         </div>
     );

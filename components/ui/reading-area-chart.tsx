@@ -5,18 +5,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from "@/components/ui/chart";
 import { TrendingUp, Activity } from "lucide-react";
 
-const generateReadingData = () => {
-    const days = 28;
-    let base = 15;
-    return Array.from({ length: days }, (_, i) => {
-        base += (Math.random() - 0.4) * 8;
-        return {
-            day: `Day ${i + 1}`,
-            minutes: Math.max(5, Math.floor(base)),
-        };
-    });
-};
-
 const chartConfig = {
     minutes: {
         label: "Minutes Read",
@@ -24,9 +12,7 @@ const chartConfig = {
     },
 } satisfies ChartConfig;
 
-export const ReadingAreaChart = () => {
-    // THE FIX: useMemo locks the data so it only generates once on mount
-    const readingData = useMemo(() => generateReadingData(), []);
+export const ReadingAreaChart = ({ stats }: { stats: any }) => {
 
     const cardRef = useRef<HTMLDivElement>(null);
     const [isHovered, setIsHovered] = useState(false);
@@ -89,7 +75,7 @@ export const ReadingAreaChart = () => {
             <div className="flex flex-col gap-2 p-0 mt-6 relative z-10 flex-1 justify-between" style={{ transform: 'translateZ(30px)' }}>
                 <div className="flex flex-col px-8 mb-4">
                     <span className="text-6xl font-extrabold tracking-tighter text-white tabular-nums drop-shadow-lg">
-                        845
+                        {stats.totalMinutes}
                     </span>
                     <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mt-1">
                         Total Minutes Accumulated
@@ -100,7 +86,7 @@ export const ReadingAreaChart = () => {
                     <ChartContainer config={chartConfig} className="h-full w-full">
                         <ResponsiveContainer width="100%" height="100%">
                             <AreaChart
-                                data={readingData}
+                                data={stats.history}
                                 margin={{ top: 20, right: 0, left: 0, bottom: 0 }}
                             >
                                 <defs>

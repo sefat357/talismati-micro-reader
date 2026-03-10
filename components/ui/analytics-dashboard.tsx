@@ -1,7 +1,7 @@
 "use client";
 import React, { useRef, useEffect, useState } from 'react';
 
-export const ReadingAnalyticsCard = () => {
+export const ReadingAnalyticsCard = ({ stats }: { stats: any }) => {
     const cardRef = useRef<HTMLDivElement>(null);
     const [isHovered, setIsHovered] = useState(false);
     const [activeTab, setActiveTab] = useState('overview');
@@ -115,7 +115,7 @@ export const ReadingAnalyticsCard = () => {
                                     +12.5%
                                 </span>
                             </div>
-                            <p className="text-4xl font-extrabold text-white tracking-tight">24,780</p>
+                            <p className="text-4xl font-extrabold text-white tracking-tight">{stats.totalWords.toLocaleString()}</p>
                             <div className="mt-4 h-1.5 rounded-full overflow-hidden bg-black/50 border border-white/5 shadow-inner">
                                 <div
                                     className="h-full bg-gradient-to-r from-red-600 to-red-400 rounded-full transition-all duration-1000 shadow-[0_0_10px_rgba(239,68,68,0.5)]"
@@ -126,9 +126,9 @@ export const ReadingAnalyticsCard = () => {
 
                         <div className="grid grid-cols-3 gap-4">
                             {[
-                                { label: 'Chunks', value: '42' },
-                                { label: 'Streak', value: '4 Days' },
-                                { label: 'Avg Speed', value: '250 wpm' }
+                                { label: 'Minutes', value: stats.totalMinutes.toString() },
+                                { label: 'Streak', value: `${stats.streak} Days` },
+                                { label: 'Avg Speed', value: `${stats.avgWpm} wpm` }
                             ].map((metric) => (
                                 <div key={metric.label} className="rounded-xl p-4 border border-white/5 bg-white/[0.02] text-center">
                                     <p className="text-[10px] font-bold uppercase tracking-widest mb-1 text-zinc-500">{metric.label}</p>
