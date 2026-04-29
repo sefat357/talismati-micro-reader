@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { Play, ChevronRight, Sparkles, BookDashed } from "lucide-react";
 import ImportBookButton from "@/components/ui/ImportBookButton";
+import Link from "next/link";
 
 export default function DashboardHomePage() {
     // Dynamic state for our library
@@ -86,12 +87,12 @@ export default function DashboardHomePage() {
                                     {activeBook.author}
                                 </p>
                                 <div className="flex flex-col sm:flex-row items-center gap-6 opacity-0 animate-[slideUp_0.8s_ease-out_forwards]" style={{ animationDelay: '300ms' }}>
-                                    <button className="flex h-12 md:h-14 items-center justify-center rounded-full bg-white px-8 font-semibold text-black transition-all hover:bg-zinc-200 active:scale-95 shadow-[0_0_20px_rgba(255,255,255,0.1)]">
+                                    <Link href={`/dashboard/read/${activeBook.id}`} className="flex h-12 md:h-14 items-center justify-center rounded-full bg-white px-8 font-semibold text-black transition-all hover:bg-zinc-200 active:scale-95 shadow-[0_0_20px_rgba(255,255,255,0.1)]">
                                         <span className="flex items-center gap-2 text-sm uppercase tracking-widest">
                                             <Play className="size-4 fill-black" />
                                             Start Session
                                         </span>
-                                    </button>
+                                    </Link>
                                     <div className="hidden sm:flex flex-col gap-2 w-48">
                                         <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
                                             <div className="h-full bg-white rounded-full transition-all duration-1000 ease-out" style={{ width: `${activeBook.progress}%` }} />
