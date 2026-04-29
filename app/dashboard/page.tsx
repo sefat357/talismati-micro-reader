@@ -1,18 +1,34 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Play, ChevronRight, Sparkles, BookDashed } from "lucide-react";
 import ImportBookButton from "@/components/ui/ImportBookButton";
 import Link from "next/link";
+import { supabase } from "@/lib/supabase";
 
 export default function DashboardHomePage() {
     // Dynamic state for our library
     const [activeBook, setActiveBook] = useState<any | null>(null);
     const [libraryBooks, setLibraryBooks] = useState<any[]>([]);
+    
+    // Auth state
+    const [user, setUser] = useState<any>(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        async function fetchSession() {
+            const { data: { session } } = await supabase.auth.getSession();
+            const currentUser = session?.user || null;
+            console.log("User session:", currentUser);
+            setUser(currentUser);
+            setLoading(false);
+        }
+        fetchSession();
+    }, []);
 
     // Handler for when Google Drive returns a file
     const handleFileImport = (file: any) => {
         const newBook = {
-            id: file.id,
+            id: file.supabaseId, // Supabase UUID for routing
             title: file.name.replace(/\.[^/.]+$/, ""), // Strip extension
             author: "Imported Document",
             progress: 0,
@@ -25,6 +41,14 @@ export default function DashboardHomePage() {
             setLibraryBooks((prev) => [...prev, newBook]);
         }
     };
+
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center min-h-[50vh] text-white">
+                <div className="animate-pulse text-zinc-500 text-sm tracking-widest uppercase">Loading Vault...</div>
+            </div>
+        );
+    }
 
     return (
         <div className="relative w-full min-h-screen text-white overflow-hidden flex flex-col">

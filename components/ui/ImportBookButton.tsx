@@ -36,7 +36,7 @@ export default function ImportBookButton({ onImport }: ImportBookButtonProps) {
                         if (!user) throw new Error("User not authenticated");
 
                         // 2. Insert the book into Supabase
-                        const { error } = await supabase
+                        const { data: newBookData, error } = await supabase
                             .from('books')
                             .upsert({
                                 user_id: user.id,
@@ -45,13 +45,15 @@ export default function ImportBookButton({ onImport }: ImportBookButtonProps) {
                                 drive_file_id: file.id,
                                 mime_type: file.mimeType,
                                 status: 'ready'
-                            }, { onConflict: 'drive_file_id' });
+                            }, { onConflict: 'drive_file_id' })
+                            .select()
+                            .single();
 
                         if (error) throw error;
                         console.log("🟢 Successfully saved to Supabase:", file.name);
 
                         // 3. Trigger the UI update
-                        onImport(file);
+                        onImport({ ...file, supabaseId: newBookData.id });
 
                     } catch (error) {
                         console.error("🔴 Error saving to database:", error);

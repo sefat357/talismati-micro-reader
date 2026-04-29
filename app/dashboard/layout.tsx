@@ -1,10 +1,18 @@
 "use client";
 import { BookOpen, BarChart2, Settings, LogOut, Bell, ChevronDown, Search, Bookmark } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabase";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
+    const router = useRouter();
+
+    const handleLogout = async () => {
+        await supabase.auth.signOut();
+        router.push('/login');
+        router.refresh(); // Crucial to clear server-side state
+    };
 
     return (
         <div className="flex h-screen w-full bg-black text-white overflow-hidden">
@@ -41,7 +49,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                         <Settings className="size-4 group-hover:text-zinc-300 transition-colors" />
                         <span className="text-sm font-medium">Settings</span>
                     </Link>
-                    <button className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-zinc-500 hover:text-red-400 hover:bg-red-500/10 transition-all group">
+                    <button onClick={handleLogout} className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-zinc-500 hover:text-red-400 hover:bg-red-500/10 transition-all group">
                         <LogOut className="size-4 group-hover:text-red-400 transition-colors" />
                         <span className="text-sm font-medium">Sign Out</span>
                     </button>
